@@ -1,9 +1,12 @@
 ﻿using KingAkademija2024.Interfaces;
-using KingAkademija2024.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace KingAkademija2024.Controllers;
 
+[ApiController]
+[Route("api/[controller]")]
+[Authorize]
 public class ProductsController : ControllerBase
 {
     private readonly IProductService _productService;
