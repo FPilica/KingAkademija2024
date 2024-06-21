@@ -1,0 +1,28 @@
+@KingAkademija2024_HostAddress = https://localhost:44316
+
+### 1. Login and obtain JWT token
+POST {{KingAkademija2024_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "emilys",
+  "password": "emilyspass"
+}
+
+> {% client.global.set("auth_token", response.body.token); %}
+
+### 2. Get all products
+GET {{KingAkademija2024_HostAddress}}/api/products
+Authorization: Bearer {{auth_token}}
+
+### 3. Get product by ID
+GET {{KingAkademija2024_HostAddress}}/api/products/1
+Authorization: Bearer {{auth_token}}
+
+### 4. Filter products by category and price
+GET {{KingAkademija2024_HostAddress}}/api/products/filter?category=groceries&minPrice=5&maxPrice=10
+Authorization: Bearer {{auth_token}}
+
+### 5. Search products by name
+GET {{KingAkademija2024_HostAddress}}/api/products/search?name=ice%20cream
+Authorization: Bearer {{auth_token}}
