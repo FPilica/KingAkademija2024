@@ -11,6 +11,5 @@ public class Product
     public string Description { get; set; }
     [JsonPropertyName("thumbnail")]
     public string Image { get; set; }
-    [JsonIgnore]
     public string Category { get; set; }
 }

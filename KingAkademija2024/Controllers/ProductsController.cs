@@ -1,6 +1,8 @@
 ﻿using KingAkademija2024.Interfaces;
+using KingAkademija2024.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Caching.Memory;
 
 namespace KingAkademija2024.Controllers;
 
@@ -11,11 +13,13 @@ public class ProductsController : ControllerBase
 {
     private readonly IProductService _productService;
     private readonly ILogger<ProductsController> _logger;
+    private readonly IMemoryCache _cache;
 
-    public ProductsController(IProductService productService, ILogger<ProductsController> logger)
+    public ProductsController(IProductService productService, ILogger<ProductsController> logger, IMemoryCache cache)
     {
         _productService = productService;
         _logger = logger;
+        _cache = cache;
     }
 
     [HttpGet("")]
@@ -43,7 +47,15 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> FilterProducts([FromQuery] string? category, [FromQuery] double? minPrice,
         [FromQuery] double? maxPrice)
     {
-        _logger.LogInformation("Filtering products - Category: {Category} - Price range: {MinPrice}-{MaxPrice}", category, minPrice ?? 0, maxPrice ?? double.PositiveInfinity );
+        var cacheKey = $"Products_Filter_{category}_{minPrice ?? 0}_{maxPrice ?? double.PositiveInfinity}";
+        
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<Product>? cachedProducts))
+        {
+            _logger.LogInformation("Returning cached filtered products - Category: {Category} - Price range: [{MinPrice}, {MaxPrice}]", category, minPrice ?? 0, maxPrice ?? double.PositiveInfinity);
+            return Ok(cachedProducts);
+        }
+        
+        _logger.LogInformation("Filtering products - Category: {Category} - Price range: [{MinPrice}, {MaxPrice}]", category, minPrice ?? 0, maxPrice ?? double.PositiveInfinity );
         
         var products = await _productService.GetProductsAsync();
 
@@ -69,6 +81,8 @@ public class ProductsController : ControllerBase
             return NotFound("No products match the given filter");
         }
 
+        _cache.Set(cacheKey, products, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(30)));
+
         return Ok(products);
     }
 
@@ -80,9 +94,26 @@ public class ProductsController : ControllerBase
             _logger.LogWarning("Invalid product name");
             return BadRequest("Invalid product name");
         }
+
+        var cacheKey = $"Products_Search_{name.ToLower()}";
+
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<Product> cachedProducts))
+        {
+            _logger.LogInformation("Returning cached products named: {Name}", name);
+            return Ok(cachedProducts);
+        }
         
         _logger.LogInformation("Searching products: {Name}", name);
         var products = await _productService.SearchProductsByNameAsync(name);
+
+        if (!products.Any())
+        {
+            _logger.LogWarning("No products match the given name");
+            return NotFound("No products match the given name");
+        }
+
+        _cache.Set(cacheKey, products, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(30)));
+        
         return Ok(products);
     }
 }
