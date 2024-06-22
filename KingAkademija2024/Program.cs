@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
 using KingAkademija2024.Interfaces;
+using KingAkademija2024.Middlewares;
 using KingAkademija2024.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -88,6 +89,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<ErrorHandlerMiddleware>();
 
 app.UseAuthentication();
 app.UseAuthorization();
