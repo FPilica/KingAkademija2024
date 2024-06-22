@@ -16,7 +16,12 @@ public class AuthController : ControllerBase
         _authService = authService;
         _logger = logger;
     }
-
+    
+    /// <summary>
+    ///  Authenticates a user and returns a JWT token.
+    /// </summary>
+    /// <param name="loginRequest">Username and password. An example valid username and password: Username: emilys | Password: emilyspass</param>
+    /// <returns>A JWT token if authentication is successful. 401 Unauthorized if authentication is unsuccessful.</returns>
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest loginRequest)
     {

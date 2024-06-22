@@ -21,7 +21,11 @@ public class ProductsController : ControllerBase
         _logger = logger;
         _cache = cache;
     }
-
+    
+    /// <summary>
+    /// Retrieves all products.
+    /// </summary>
+    /// <returns>A list of products.</returns>
     [HttpGet("")]
     public async Task<IActionResult> GetProducts()
     {
@@ -29,7 +33,12 @@ public class ProductsController : ControllerBase
         var products = await _productService.GetProductsAsync();
         return Ok(products);
     }
-
+    
+    /// <summary>
+    /// Retrieves a product by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the product.</param>
+    /// <returns>The products with the specified ID.</returns>
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProduct(int id)
     {
@@ -42,7 +51,14 @@ public class ProductsController : ControllerBase
         }
         return Ok(product);
     }
-
+    
+    /// <summary>
+    /// Filters products by category and/or price.
+    /// </summary>
+    /// <param name="category">The category of the products.</param>
+    /// <param name="minPrice">The minimum price of the products.</param>
+    /// <param name="maxPrice">The maximum price of the products.</param>
+    /// <returns>A list of products that match the given filter.</returns>
     [HttpGet("filter")]
     public async Task<IActionResult> FilterProducts([FromQuery] string? category, [FromQuery] double? minPrice,
         [FromQuery] double? maxPrice)
@@ -85,7 +101,12 @@ public class ProductsController : ControllerBase
 
         return Ok(products);
     }
-
+    
+    /// <summary>
+    /// Searches products by name.
+    /// </summary>
+    /// <param name="name">The name or part of the name of the products.</param>
+    /// <returns>A list of products that match the filter criteria.</returns>
     [HttpGet("search")]
     public async Task<IActionResult> SearchProducts([FromQuery] string name)
     {
