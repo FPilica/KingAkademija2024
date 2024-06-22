@@ -1,4 +1,4 @@
-# KingAkademija2024
+# KingAkademija2024 - Fran Pilica
 
 This project is a middleware REST API for fetching products from various sources (e.g., web services, databases, file systems, RSS feeds) with filtering capabilities. Currently, it supports fetching products from a REST API (https://dummyjson.com/products).
 
