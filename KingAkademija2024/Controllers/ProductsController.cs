@@ -29,8 +29,19 @@ public class ProductsController : ControllerBase
     [HttpGet("")]
     public async Task<IActionResult> GetProducts()
     {
+        var cacheKey = "Products_All";
+        
+        if (_cache.TryGetValue(cacheKey, out IEnumerable<Product> productsAll))
+        {
+            _logger.LogInformation("Returning all cached products");
+            return Ok(productsAll);
+        }
+        
         _logger.LogInformation("Fething all products");
         var products = await _productService.GetProductsAsync();
+
+        _cache.Set(cacheKey, products, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(30)));
+            
         return Ok(products);
     }
     
@@ -42,6 +53,14 @@ public class ProductsController : ControllerBase
     [HttpGet("{id}")]
     public async Task<IActionResult> GetProduct(int id)
     {
+        var cacheKey = $"Products_Id_{id}";
+        
+        if (_cache.TryGetValue(cacheKey, out Product productId))
+        {
+            _logger.LogInformation("Returning cached product with id: {Id}", id);
+            return Ok(productId);
+        }
+        
         _logger.LogInformation("Fatching product: {Id}", id);
         var product = await _productService.GetProductByIdAsync(id);
         if (product == null)
@@ -49,6 +68,9 @@ public class ProductsController : ControllerBase
             _logger.LogWarning("Product: {Id} not found", id);
             return NotFound();
         }
+
+        _cache.Set(cacheKey, product, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(30)));
+        
         return Ok(product);
     }
     
